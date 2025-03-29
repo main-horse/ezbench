@@ -122,10 +122,10 @@ class LLM:
 #llm = LLM("gpt-3.5-turbo")
 #llm = LLM("gpt-4-turbo-2024-04-09")
 #llm = LLM("gemini-1.5-pro-preview-0409")
-llm = LLM("o1-mini")
+#llm = LLM("o1-mini")
 
 #llm = LLM("claude-3-opus-20240229")
-#llm = LLM("claude-3-5-sonnet-20240620")
+llm = LLM("claude-3-5-sonnet-20240620")
 
 #llm = LLM("mistral-tiny")
 #llm = LLM("gemini-pro", override_hparams={'temperature': 0.3}, use_cache=False)

@@ -622,8 +622,9 @@ class CargoRun(Node):
 
         out = invoke_docker(self.env, {"src/main.rs": code.encode(),
                                        "Cargo.toml": self.cargo_toml.encode(),
-                                       "main.sh": "cargo run -q".encode()},
-                            ["bash", "main.sh"], input=self.input)
+                                       "input.data": self.input,
+                                       "main.sh": "cargo run -q < input.data".encode()},
+                            ["bash", "main.sh"])
         yield out, Reason(type(self), (code, out))
 
 class CRun(Node):
@@ -938,4 +939,6 @@ if (answer != expected) {{
     return "\n".join(qs), "All tests passed"
         
     
-
+def read_file(base_file, name):
+    with open(os.path.join(os.path.dirname(base_file), name), 'rb') as f:
+        return f.read()
