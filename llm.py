@@ -125,7 +125,8 @@ class LLM:
 #llm = LLM("o1-mini")
 
 #llm = LLM("claude-3-opus-20240229")
-llm = LLM("claude-3-5-sonnet-20240620")
+#llm = LLM("claude-3-5-sonnet-20240620")
+llm = LLM("claude-3-7-sonnet-20250219")
 
 #llm = LLM("mistral-tiny")
 #llm = LLM("gemini-pro", override_hparams={'temperature': 0.3}, use_cache=False)
