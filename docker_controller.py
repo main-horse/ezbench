@@ -84,6 +84,8 @@ if BACKEND == "docker":
         container.put_archive(path, tarfile)
     
         exit_code, output = container.exec_run(run_cmd)
+        if exit_code != 0:
+            raise RuntimeError(output.decode())
         
         return output
 elif BACKEND == "podman":
@@ -145,7 +147,7 @@ class DockerJob:
         self.eos_string = eos_string
 
         if BACKEND == "docker":
-            cmd = f"docker exec -it {container_id} /bin/bash"
+            cmd = f"docker exec -v cargo-cache:/root/.cargo -it {container_id} /bin/bash"
             print("Running", cmd)
         else:
             cmd = f"podman exec -it {container_id} /bin/bash"

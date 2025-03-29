@@ -64,6 +64,9 @@ def format_markdown(reason, indent=0):
     elif reason.node == ThenNode: # has to be after and/or because children
         return format_markdown(reason.children[0], indent) +\
             "\n" + format_markdown(reason.children[1], indent)
+    elif reason.node == MultiShotLLMRun:
+        return format_markdown(reason.children[0], indent) +\
+            "\n" + format_markdown(reason.children[1], indent)
     elif reason.node == StringNode:
         return f"{pounds} Initial Query\n{fix(reason.children.strip())}\n"
     elif reason.node == Setup:

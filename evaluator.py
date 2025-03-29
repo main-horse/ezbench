@@ -382,7 +382,48 @@ class UntilDone(Node):
             orig_output, partial = next(self.body(orig_output))
             log.append(partial)
         yield orig_output, Reason(type(self), log)
-            
+
+class MultiShotLLMRun(Node):
+    """
+    Like LLMRun, but we will run a continuation on the output;
+    if the continuation raises an exception, we feed the exception
+    to LLMRun conversation and try again.
+
+    TODO: Right now, we rely on the default LLM behavior, which is 'whole'
+    edit style (reproduce the entire program).  Aider has done a study
+    of what edit formats work well for SOTA models, and would be a good
+    default choice here https://aider.chat/docs/leaderboards/edit.html
+    The edit format itself is worth an eval in and of itself.
+    """
+    def __init__(self, k, max_iters=2):
+        self.f = LLMConversation()
+        self.k = k
+        self.max_iters = max_iters
+
+    def setup(self, env, conv, llm, eval_llm, vision_eval_llm):
+        super().setup(env, conv, llm, eval_llm, vision_eval_llm)
+        self.f.setup(env, conv, llm, eval_llm, vision_eval_llm)
+        self.k.setup(env, conv, llm, eval_llm, vision_eval_llm)
+
+    def __call__(self, output=None):
+        log = []
+
+        for i in range(self.max_iters):
+            f_output, partial = next(self.f(output))
+            log.append(partial)
+            try:
+                k_output, partial = next(self.k(f_output))
+                log.append(partial)
+                yield k_output, Reason(type(self), log)
+                return
+            except Exception as e:
+                if i == self.max_iters - 1:
+                    raise
+                else:
+                    output = "Fix these errors:\n\n" + str(e)
+
+        assert False
+
 class ExtractJSON(Node):
     """
     A node that extracts a JSON object from the response.
@@ -581,7 +622,7 @@ class CargoRun(Node):
 
         out = invoke_docker(self.env, {"src/main.rs": code.encode(),
                                        "Cargo.toml": self.cargo_toml.encode(),
-                                       "main.sh": "cargo run".encode()},
+                                       "main.sh": "cargo run -q".encode()},
                             ["bash", "main.sh"], input=self.input)
         yield out, Reason(type(self), (code, out))
 
