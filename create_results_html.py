@@ -72,7 +72,7 @@ def format_markdown(reason, indent=0):
         return f"{pounds} HTML Render\nRendering the webpage gives the following image:\n{reason.children}\n"
     elif reason.node in (LLMRun, LLMVisionRun, LLMConversation):
         return f"{pounds} LLM Generation\n#{pounds} Query\n{fix(reason.children[0].strip())}\n#{pounds} Output\n{fix(reason.children[1].strip())}\n"
-    elif reason.node in (PythonRun, CRun, CppRun, RustRun, BashRun, TerminalRun, SQLRun):
+    elif reason.node in (PythonRun, CRun, CppRun, RustRun, CargoRun, BashRun, TerminalRun, SQLRun):
         return f"{pounds} Run Code Interpreter\nRunning the following program:\n> ```\n{fix(reason.children[0].strip())}\n> ```\nAnd got the output:\n```\n{reason.children[1]}\n```\n"
     elif reason.node == ExtractCode:
         return f"{pounds} Extract Code\nI extracted the following code from that output:\n> ```\n{fix(reason.children.strip())}\n> ```\n"

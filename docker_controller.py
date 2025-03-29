@@ -197,14 +197,14 @@ class DockerJob:
         return output
 
 
-def invoke_docker(env, files, run_cmd, out_bytes=False):
+def invoke_docker(env, files, run_cmd, out_bytes=False, input=None):
     if env.docker is None:
         setup_docker(env)
 
     def raise_timeout(signum, frame):
         raise TimeoutError
     signal.signal(signal.SIGALRM, raise_timeout)
-    signal.alarm(20)
+    signal.alarm(60)
     
     try:
         # Function call that might take too long
@@ -246,7 +246,7 @@ if I_HAVE_BLIND_FAITH_IN_LLMS_AND_AM_OKAY_WITH_THEM_BRICKING_MY_MACHINE_OR_MAKIN
             for file_name, file_content in files.items():
                 with open("/tmp/fakedocker_%d/%s"%(env.fake_docker_id, file_name), "wb") as f:
                     f.write(file_content)
-            proc = subprocess.run(run_cmd, cwd="/tmp/fakedocker_%d"%env.fake_docker_id, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = subprocess.run(run_cmd, cwd="/tmp/fakedocker_%d"%env.fake_docker_id, stdout=subprocess.PIPE, stderr=subprocess.PIPE, input=input)
         except TimeoutError:
             if out_bytes:
                 return b"Timeout: function took too long to complete"

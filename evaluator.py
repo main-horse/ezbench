@@ -562,6 +562,29 @@ class RustRun(Node):
                             ["bash", "main.sh"])
         yield out, Reason(type(self), (code, out))
 
+class CargoRun(Node):
+    """
+    A node that compiles and runs the output Rust code from the prior command using Cargo.
+
+    Optionally append a set of test cases to the code that's been provided.
+    """
+    def __init__(self, cargo_toml, test_case="", input=None):
+        self.test_case = test_case
+        self.cargo_toml = cargo_toml
+        self.input = input
+
+    def __call__(self, code):
+        if 'fn main' in code and 'fn main' in self.test_case:
+            code = code.replace('fn main', 'fn __delete_this__main')
+
+        code = code + "\n\n" + self.test_case
+
+        out = invoke_docker(self.env, {"src/main.rs": code.encode(),
+                                       "Cargo.toml": self.cargo_toml.encode(),
+                                       "main.sh": "cargo run".encode()},
+                            ["bash", "main.sh"], input=self.input)
+        yield out, Reason(type(self), (code, out))
+
 class CRun(Node):
     """
     A node that runs the output from the prior command as a c function.
