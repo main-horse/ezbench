@@ -23,6 +23,7 @@ import io
 import docker
 import inspect
 import re
+import difflib
 
 import numpy as np
 
@@ -353,7 +354,7 @@ class EqualEvaluator(Node):
         if self.goal == output:
             yield True, Reason(type(self), [self.goal, True])
         else:
-            yield False, Reason(type(self), [self.goal, False])
+            yield False, Reason(type(self), [''.join(difflib.unified_diff(self.goal.splitlines(keepends=True), output.splitlines(keepends=True))), False])
 
 class UntilDone(Node):
     """

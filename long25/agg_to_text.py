@@ -33,10 +33,24 @@ For example, suppose an asciinema dump is of a 2x2 window counting down from thr
 ----
 ```
 
-Use avt as your terminal emulator.  You will compile with the following
-Cargo.toml attached below; do not use any other dependencies.  After the
-Cargo.toml is the complete source code of agg, which you should use as reference.
+Use avt as your terminal emulator.
 
+You will compile with the following Cargo.toml attached below; do not use any
+other dependencies.  After the Cargo.toml is the complete source code of agg,
+which you should use as reference.
+
+"""
+
+extra_prompt = """
+Use the same frame selection algorithm as agg:
+- Batching events based on timing and FPS cap
+- Accelerating playback based on speed parameter
+- Limiting idle time between frames
+
+Use the default settings for these parameters:
+- Idle time limit (5.0 seconds)
+- Playback speed (1.0)
+- FPS cap (30)
 """
 
 cargo = r"""
@@ -61,6 +75,7 @@ TestAggToText = (
     StringNode(question + cargo + context) >>
     MultiShotLLMRun(
         ExtractLongestCode() >> CargoRun(cargo, input=test_term),
+        max_iters=5,
     ) >>
     EqualEvaluator(expect)
 )

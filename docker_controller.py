@@ -62,8 +62,12 @@ if BACKEND == "docker":
     import docker
     def setup_docker(env):
         env.docker = docker.from_env()
-        env.container = env.docker.containers.run("llm-benchmark-image", detach=True, tty=True)    
-    
+        mounts = [
+            docker.types.Mount("/root/.cargo", "cargo-cache"),
+            docker.types.Mount("/usr/src/app/target", "cargo-target"),
+        ]
+        env.container = env.docker.containers.run("llm-benchmark-image", detach=True, tty=True, mounts=mounts)
+
     def stop_and_remove_container(client, container_id):
         # Stopping the container
         client.containers.get(container_id).stop()
