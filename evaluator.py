@@ -453,6 +453,49 @@ class ExtractJSON(Node):
             for maybe in self.try_extract(output):
                 yield maybe, Reason(type(self), [maybe])
 
+class ExtractLongestCode(Node):
+    """
+    A node that extracts code from the response
+
+    Usually you can just extract the code out of the response,
+    but if the response contains multiple possible code objects,
+    we pick the longest one (different from ExtractCode which does
+    an LLM call)
+    """
+    def __init__(self, keep_main=False, postfix="", manual=None, lang=None):
+        self.keep_main = keep_main
+        self.postfix = postfix
+        self.manual = manual
+        self.lang = lang
+
+    def extract_longest_code_block(self, markdown):
+        """
+        Extracts the longest triple-backtick code block from the given markdown text.
+
+        Args:
+            markdown (str): The markdown string containing one or more code blocks.
+
+        Returns:
+            str or None: The content of the longest code block, or None if no code block is found.
+        """
+        # This regex matches triple backtick code blocks. It optionally allows a language specifier.
+        # The [a-zA-Z0-9]* matches a possible language after the opening ```.
+        pattern = r"```(?:[a-zA-Z0-9]*)?\n(.*?)```"
+        code_blocks = re.findall(pattern, markdown, re.DOTALL)
+
+        if not code_blocks:
+            return None
+
+        # Return the longest code block based on character count.
+        return max(code_blocks, key=len)
+
+    def __call__(self, orig_output):
+        r = self.extract_longest_code_block(orig_output)
+        if r is not None:
+            yield r, Reason(type(self), r)
+        yield orig_output, Reason(type(self), orig_output)
+
+
 class ExtractCode(Node):
     """
     A node that extracts code from the response
@@ -720,7 +763,7 @@ class LLMRun(Node):
         llm = getattr(self, self.which_llm)
         to_send = self.check_prompt.replace("<A>", output)
         out = llm(to_send, json=self.json)
-            
+
         yield out, Reason(type(self), (to_send, out))
 
 class LLMConversation(Node):

@@ -15,7 +15,7 @@ class AnthropicModel:
         conversation = [{"role": "user" if i%2 == 0 else "assistant", "content": content} for i,content in enumerate(conversation)]
         response = anthropic.Anthropic(api_key=self.api_key).messages.create(
             model=self.name,
-            max_tokens=2048,
+            max_tokens=20480,
             messages=conversation
         )
 

@@ -1,7 +1,9 @@
 from evaluator import *
 
 question = """
-Create a Rust CLI program that takes an asciinema dump via stdin and outputs plain text dump of the terminal state each frame to stdout, using the same the frame choice algorithm that agg uses.  The output frame format is:
+Create a Rust CLI program that takes an asciinema dump via stdin and outputs plain text dump of the terminal state each frame to stdout.  You must use the SAME frame choice algorithm that agg uses (it's source code will be attached later).
+
+The output frame format should be as follows:
 
 ```
 FRAME0_LINE0 (COL characters wide)
@@ -31,10 +33,10 @@ For example, suppose an asciinema dump is of a 2x2 window counting down from thr
 ----
 ```
 
-Note that lines are padded out to the full column length with spaces.
+Use avt as your terminal emulator.  You will compile with the following
+Cargo.toml attached below; do not use any other dependencies.  After the
+Cargo.toml is the complete source code of agg, which you should use as reference.
 
-Use avt as your terminal emulator.  You will compile with the following Cargo.toml attached below.
-I've also attached the agg source code as reference.
 """
 
 cargo = r"""
@@ -48,79 +50,17 @@ avt = "0.15.1"
 anyhow = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
 """
 
 context = read_file(__file__, 'agg_to_text.context.md').decode()
 test_term = read_file(__file__, 'agg_to_text.test.term')
-
-expect = """
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-----
-Current Time: 2025-03-30 06:54:17   
-╭────── 'log_view' (36 x 10) ──────╮
-│                                  │
-│                                  │
-│                                  │
-│     Layout(name='log_view')      │
-│                                  │
-│                                  │
-│                                  │
-│                                  │
-╰──────────────────────────────────╯
-----
-
-Current Time: 2025-03-30 06:54:18   
-╭────── 'log_view' (36 x 10) ──────╮
-│                                  │
-│                                  │
-│                                  │
-│     Layout(name='log_view')      │
-│                                  │
-│                                  │
-│                                  │
-│                                  │
-╰──────────────────────────────────╯
-----
-Current Time: 2025-03-30 06:54:19   
-╭────── 'log_view' (36 x 10) ──────╮
-│                                  │
-│                                  │
-│                                  │
-│     Layout(name='log_view')      │
-│                                  │
-│                                  │
-│                                  │
-│                                  │
-╰──────────────────────────────────╯
-----
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-----
-"""
+expect = read_file(__file__, 'agg_to_text.expect.txt').decode()
 
 TestAggToText = (
     StringNode(question + cargo + context) >>
     MultiShotLLMRun(
-        ExtractCode(keep_main=True) >> CargoRun(cargo, input=test_term),
+        ExtractLongestCode() >> CargoRun(cargo, input=test_term),
     ) >>
     EqualEvaluator(expect)
 )

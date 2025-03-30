@@ -83,11 +83,15 @@ if BACKEND == "docker":
         path = "/usr/src/app"
         container.put_archive(path, tarfile)
     
-        exit_code, output = container.exec_run(run_cmd)
+        # TODO: port this to the other backends
+        # TODO: this is probably a bit inflexible, probably breaks preexisting
+        # tests
+        exit_code, stdout_stderr = container.exec_run(run_cmd, demux=True)
+        stdout, stderr = stdout_stderr
         if exit_code != 0:
-            raise RuntimeError(output.decode())
+            raise RuntimeError(stderr.decode())
         
-        return output
+        return stdout
 elif BACKEND == "podman":
     def setup_docker(env):
         # Starting a container with Podman
@@ -147,7 +151,7 @@ class DockerJob:
         self.eos_string = eos_string
 
         if BACKEND == "docker":
-            cmd = f"docker exec -v cargo-cache:/root/.cargo -it {container_id} /bin/bash"
+            cmd = f"docker exec -v cargo-cache:/root/.cargo -v cargo-target:target -it {container_id} /bin/bash"
             print("Running", cmd)
         else:
             cmd = f"podman exec -it {container_id} /bin/bash"
