@@ -2,3 +2,4 @@
 config.json
 myenv
 tmp/*
+__pycache__
