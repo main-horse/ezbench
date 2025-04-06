@@ -1,6 +1,6 @@
 import functools
 from evaluator import *
-from tests.harness import ensure_nonblocking, torch, extract_function
+from tests.harness import ensure_nonblocking, torch, extract_function, guarded
 
 DESCRIPTION = """Ability to construct a dropout mask with arbitrary probability without blocking.
 
@@ -24,8 +24,8 @@ Assume torch is already imported.
 """
 
 def method_satisfies(f: callable) -> bool:
-    try: t = f()
-    except: return __import__('traceback').print_exc() != None # always False
+    t = guarded(f)()
+    if not isinstance(t, torch.Tensor): return False
     likeness = t.device.type == 'cuda' and t.numel() == 1<<16 and t.ndim == 1 and t.dtype == torch.bool
     percentage = t.nonzero().numel() / t.numel()
     return likeness and abs(percentage - 0.1) < 0.05
