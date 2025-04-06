@@ -94,5 +94,6 @@ if __name__ == "__main__":
     # exec(codeblock, globals(), namespace := {})
     # print(method_satisfies(namespace['create_mesh']))
 
-    print(run_test(TestThing, llm_="gpt-4o"))
+    # print(run_test(TestThing, llm_="gpt-4o"))
     # print(run_test(TestThing, llm_="claude-3-7-sonnet-latest"))
+    print(run_test(TestThing, llm_="gemini-2.0-flash"))

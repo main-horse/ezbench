@@ -20,11 +20,11 @@ PYTHONPATH='.' uv run tests/create_mask.py
 
 #### results
 
-| Test | GPT-4o | Claude 3.7 Sonnet |
-|------|--------|-------------------|
-| construct_device_mesh | ❌ | ❌ |
-| create_scalar | ❌ | ✅ |
-| create_mask | ✅  | ✅ |
+| Test | GPT-4o | Claude 3.7 Sonnet | Gemini 2.0 Flash |
+|------|--------|-------------------|------------------|
+| construct_device_mesh | ❌ | ❌ | ❌ |
+| create_scalar | ❌ | ✅ | ❌ |
+| create_mask | ✅  | ✅ | ✅ |
 
 
 
