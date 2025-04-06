@@ -1,4 +1,5 @@
 # NOT ACTUALLY A TEST DO NOT RUN ME
+import functools
 import time
 import torch
 
@@ -16,8 +17,16 @@ def huge_nonblocking_work(
     o=torch.empty(100,4096,4096,device='cuda')
 ): return torch.bmm(a,a,out=o)
 
-def ensure_nonblocking(code: str) -> bool:
-    f = eval(code)
+def guarded(f):
+    @functools.wraps(f)
+    def inner(*a,**k):
+        try: return f(*a,**k)
+        except: return __import__('traceback').print_exc() != None
+    return inner
+
+@guarded
+def ensure_nonblocking(code: "str | Callable[[], Any]") -> bool:
+    f = eval(code) if isinstance(code, str) else code
     # ensure kernels, cuda alloc, etc. all exist
     huge_nonblocking_work() 
     f()
@@ -29,9 +38,11 @@ def ensure_nonblocking(code: str) -> bool:
             f()
         torch.cuda.synchronize()
     # heuristic: we expect the cpu exec time to be at least 5x faster than the gpu
-    return inner()*5 < outer()
+    inner,outer = inner(),outer()
+    return inner*5 < outer
 
 if __name__ == "__main__":
     assert ensure_nonblocking("lambda: 1")
     assert ensure_nonblocking("lambda: torch.zeros(1,device='cuda')")
     assert ensure_nonblocking("lambda: torch.randn(128,1024,1024,device='cuda')")
+    assert ensure_nonblocking("lambda: torch.empty(65536,device='cuda').bernoulli_(0.01)")

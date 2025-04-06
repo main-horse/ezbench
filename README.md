@@ -8,15 +8,17 @@ make sure you have gpus
 #### tests
 ```bash
 PYTHONPATH='.' uv run tests/create_scalar.py
+PYTHONPATH='.' uv run tests/create_mask.py
 ```
 
-yeah, that's it. there's only one test.
+yeah, that's it. there's only two tests.
 
 #### results
 
 | Test | GPT-4o | Claude 3.7 Sonnet |
 |------|--------|-------------------|
 | create_scalar | ❌ | ✅ |
+| create_mask | ✅  | ✅ |
 
 
 
