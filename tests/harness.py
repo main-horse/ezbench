@@ -5,17 +5,17 @@ import torch
 
 from contextlib import contextmanager
 
+def extract_function(code_str: str, fn_name: str) -> callable:
+    namespace = {}
+    exec(code_str, globals(), namespace)
+    return namespace.get(fn_name)
+
 @contextmanager
 def timeit():
     start_time = time.time()
     ptr = []
     try: yield lambda: ptr.pop() - start_time
     finally: ptr.append(time.time())
-
-def huge_nonblocking_work(
-    a=torch.randn(100,4096,4096,device='cuda'),
-    o=torch.empty(100,4096,4096,device='cuda')
-): return torch.bmm(a,a,out=o)
 
 def guarded(f):
     @functools.wraps(f)
@@ -26,6 +26,10 @@ def guarded(f):
 
 @guarded
 def ensure_nonblocking(code: "str | Callable[[], Any]") -> bool:
+    def huge_nonblocking_work(
+        a=torch.randn(50,4096,4096,device='cuda'),
+        o=torch.empty(50,4096,4096,device='cuda')
+    ): return torch.bmm(a,a,out=o)
     f = eval(code) if isinstance(code, str) else code
     # ensure kernels, cuda alloc, etc. all exist
     huge_nonblocking_work() 

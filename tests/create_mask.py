@@ -1,6 +1,6 @@
 import functools
 from evaluator import *
-from tests.harness import ensure_nonblocking, torch
+from tests.harness import ensure_nonblocking, torch, extract_function
 
 DESCRIPTION = """Ability to construct a dropout mask with arbitrary probability without blocking.
 
@@ -30,13 +30,10 @@ def method_satisfies(f: callable) -> bool:
     percentage = t.nonzero().numel() / t.numel()
     return likeness and abs(percentage - 0.1) < 0.05
 
-def extract_function(code_str: str) -> callable:
-    namespace = {}
-    exec(code_str, globals(), namespace)
-    return namespace.get('nonblocking_mask_with_prob')
 
-
-TestThing = question >> LLMRun() >> CorrectlyExtractCode() >> PyFunc(lambda s: functools.partial(extract_function(s), 1<<16, 0.1)) >> AndNode(
+TestThing = question >> LLMRun() >> CorrectlyExtractCode() >> PyFunc(
+    lambda s: functools.partial(extract_function(s, 'nonblocking_mask_with_prob'), 1<<16, 0.1)
+) >> AndNode(
     PyFunc(ensure_nonblocking), # check that it's nonblocking,
     PyFunc(method_satisfies) # check that it satisfies the method's contract
 )
