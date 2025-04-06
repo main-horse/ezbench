@@ -66,6 +66,8 @@ def run_all_tests(test_llm, use_cache=True, which_tests=None):
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
         except:
+            import traceback
+            traceback.print_exc()
             print("SKIPPING TEST", f)
             continue
         test_case = [x for x in dir(module) if x.startswith("Test") and x != "TestCase"]

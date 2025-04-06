@@ -40,10 +40,18 @@ def fix(x):
         x = x + "\n```"
     return "\n".join("> "+line for line in x.split("\n"))
 
-def format_markdown(reason, indent=0):
+def generate_section(pounds, header, text, term: bool):
+    # ANSI color codes
+    BOLD = "\033[1m"
+    GREY = "\033[90m"
+    RESET = "\033[0m"
+    return f"{pounds}{BOLD} {header}{RESET}\n{GREY}{text}{RESET}" if term else f"{pounds} {header}\n{text}"
+
+def format_markdown(reason, indent=0, *, term=False):
     """
     Convert a Reason object into a markdown string that explains how we got to the result.
     """
+    format_markdown = lambda *a,**k: globals()['format_markdown'](*a,**k,term=term)
 
     pounds = "#" * (indent+1)
     if reason.node in (AndNode, OrNode):
@@ -68,33 +76,33 @@ def format_markdown(reason, indent=0):
         return format_markdown(reason.children[0], indent) +\
             "\n" + format_markdown(reason.children[1], indent)
     elif reason.node == StringNode:
-        return f"{pounds} Initial Query\n{fix(reason.children.strip())}\n"
+        return generate_section(pounds, "Initial Query", fix(reason.children.strip()), term)
     elif reason.node == Setup:
-        return f"{pounds} Docker Setup\nI have setup the docker container to run the model evaluation."
+        return generate_section(pounds, "Docker Setup", "I have setup the docker container to run the model evaluation.", term)
     elif reason.node == SeleniumDraw:
-        return f"{pounds} HTML Render\nRendering the webpage gives the following image:\n{reason.children}\n"
+        return generate_section(pounds, "HTML Render", f"Rendering the webpage gives the following image:\n{reason.children}", term)
     elif reason.node in (LLMRun, LLMVisionRun, LLMConversation):
-        return f"{pounds} LLM Generation\n#{pounds} Query\n{fix(reason.children[0].strip())}\n#{pounds} Output\n{fix(reason.children[1].strip())}\n"
+        return generate_section(pounds, "LLM Generation", f"#{pounds} Query\n{fix(reason.children[0].strip())}\n#{pounds} Output\n{fix(reason.children[1].strip())}", term)
     elif reason.node in (PythonRun, CRun, CppRun, RustRun, CargoRun, BashRun, TerminalRun, SQLRun):
-        return f"{pounds} Run Code Interpreter\nRunning the following program:\n> ```\n{fix(reason.children[0].strip())}\n> ```\nAnd got the output:\n```\n{reason.children[1]}\n```\n"
+        return generate_section(pounds, "Run Code Interpreter", f"Running the following program:\n> ```\n{fix(reason.children[0].strip())}\n> ```\nAnd got the output:\n```\n{reason.children[1]}\n```", term)
     elif reason.node in (ExtractCode, ExtractLongestCode):
-        return f"{pounds} Extract Code\nI extracted the following code from that output:\n> ```\n{fix(reason.children.strip())}\n> ```\n"
+        return generate_section(pounds, "Extract Code", f"I extracted the following code from that output:\n> ```\n{fix(reason.children.strip())}\n> ```", term)
     elif reason.node == ExtractJSON:
-        return f"{pounds} Extract Json\nI extracted the following JSON from that output:\n> ```json\n{fix(reason.children[0])}\n> ```\n"
+        return generate_section(pounds, "Extract Json", f"I extracted the following JSON from that output:\n> ```json\n{fix(reason.children[0])}\n> ```", term)
     elif reason.node == SubstringEvaluator:
-        return f"{pounds} Substring Evaluation\nTesting if the previous output contains the string `{reason.children[0]}`: {reason.children[1]}\n"
+        return generate_section(pounds, "Substring Evaluation", f"Testing if the previous output contains the string `{reason.children[0]}`: {reason.children[1]}", term)
     elif reason.node == RegexEvaluator:
-        return f"{pounds} Regex Evaluation\nTesting if the previous output matches the regex `{reason.children[0]}`: {reason.children[1]}\n"
+        return generate_section(pounds, "Regex Evaluation", f"Testing if the previous output matches the regex `{reason.children[0]}`: {reason.children[1]}", term)
     elif reason.node == EqualEvaluator:
-        return f"{pounds} Equal Evaluation\nTesting if the previous output equals the string `{reason.children[0]}`: {reason.children[1]}\n"
+        return generate_section(pounds, "Equal Evaluation", f"Testing if the previous output equals the string `{reason.children[0]}`: {reason.children[1]}", term)
     elif reason.node == ContainsIntEvaluator:
-        return f"{pounds} Contains Int Evaluation\nTesting if the previous output contains the integers `{reason.children[0]}`: {reason.children[1]}\n"
+        return generate_section(pounds, "Contains Int Evaluation", f"Testing if the previous output contains the integers `{reason.children[0]}`: {reason.children[1]}", term)
     elif reason.node == JSONSubsetEvaluator:
-        return f"{pounds} JSON Subset Evaluator\nTesting if the previous output matches the JSON: `{json.dumps(reason.children[0], indent=4)}`: {reason.children[1]}\n"
+        return generate_section(pounds, "JSON Subset Evaluator", f"Testing if the previous output matches the JSON: `{json.dumps(reason.children[0], indent=4)}`: {reason.children[1]}", term)
     elif reason.node in (PyFunc, MakeFile, PyEvaluator):
-        return f"{pounds} PyFunc\n{fix(reason.children[0])}\nResulting in output:\n{fix(reason.children[1])}".replace("\n\n","\n")
+        return generate_section(pounds, "PyFunc", f"Running the following function:\n```\n{fix(reason.children[0])}\n```\nResulting in output:\n```\n{fix(reason.children[1])}\n```", term)
     elif reason.node == SendStdoutReceiveStdin:
-        return f"{pounds} Send to Process Stdout\n{fix(reason.children[0])}"
+        return generate_section(pounds, "Send to Process Stdout", f"Sending the following to process stdout:\n```\n{fix(reason.children[0])}\n```", term)
     elif reason.node == UntilDone:
         out = f"{pounds} Looping until done\n"
         for iteration,sub in enumerate(reason.children):

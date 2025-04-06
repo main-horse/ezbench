@@ -239,6 +239,8 @@ class PyFunc(Node):
             else:
                 return [(out, Reason(type(self), ("", out)))]
         except:
+            import traceback
+            print(traceback.format_exc())
             return [("", Reason(type(self), ["Error", False]))]
 
 class Echo(Node):
@@ -938,7 +940,7 @@ def run_test(test):
             break
 
     import create_results_html
-    fmt = create_results_html.format_markdown(output)
+    fmt = create_results_html.format_markdown(output, term=True)
     while '\n\n' in fmt:
         fmt = fmt.replace('\n\n', '\n')
     fmt = fmt.replace("\n#", "\n\n#")
