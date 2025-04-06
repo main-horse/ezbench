@@ -182,7 +182,7 @@ def main():
     if args.model:
         models_to_run = args.model
     elif args.all_models:
-        models_to_run = ["gpt-4o", "claude-3-7-sonnet-latest"]
+        models_to_run = ["gpt-4o", "claude-3-7-sonnet-latest", "gemini-2.0-flash"]
 
     data = {}
     for model in models_to_run:

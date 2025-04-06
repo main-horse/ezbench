@@ -24,10 +24,10 @@ import time
 from llms.openai_model import OpenAIModel
 from llms.anthropic_model import AnthropicModel
 from llms.mistral_model import MistralModel
-from llms.vertexai_model import VertexAIModel
 from llms.cohere_model import CohereModel
 from llms.moonshot_model import MoonshotAIModel
 from  llms.groq_model import GroqModel
+from llms.genai_model import GenAIModel
 
 class LLM:
     def __init__(self, name="gpt-3.5-turbo", use_cache=True, override_hparams={}):
@@ -38,10 +38,8 @@ class LLM:
         #     self.model = LLAMAModel(name)
         elif 'mistral' in name:
             self.model = MistralModel(name)
-        elif 'bison' in name or 'gemini' in name:
-            self.model = VertexAIModel(name)
-        #elif 'gemini' in name:
-        #    self.model = GeminiModel(name)
+        elif 'gemini' in name:
+           self.model = GenAIModel(name)
         elif 'claude' in name:
             self.model = AnthropicModel(name)
         elif 'moonshot' in name:
