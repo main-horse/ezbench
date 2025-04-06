@@ -1,3 +1,29 @@
+# torch trivia tests
+
+#### install
+`uv sync`
+
+make sure you have gpus
+
+#### tests
+```bash
+PYTHONPATH='.' uv run tests/create_scalar.py
+```
+
+yeah, that's it. there's only one test.
+
+#### results
+
+| Test | GPT-4o | Claude 3.7 Sonnet |
+|------|--------|-------------------|
+| create_scalar | ❌ | ✅ |
+
+
+
+---
+
+rest of original repo below
+
 # Yet Another Applied LLM Benchmark
 
 This is a benchmark I made, for me, to test how well language models perform

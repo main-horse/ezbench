@@ -3,3 +3,5 @@ config.json
 myenv
 tmp/*
 __pycache__
+evaluation_examples
+results
