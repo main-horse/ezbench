@@ -946,12 +946,18 @@ class Conversation:
     def __repr__(self):
         return "Conversation(" + repr(self.history) + ")"
 
-def run_test(test):
+def run_test(test, llm_=None, eval_llm_=None, vision_eval_llm_=None):
     """
     A helper function to run just one specific test case.
     Used to debug tests by running each file directly.
     """
-    from llm import llm, eval_llm, vision_eval_llm
+    # default args
+    from llm import llm, eval_llm, vision_eval_llm, LLM
+    def optional(x, default): return default if x is None else LLM(x) if isinstance(x, str) else x
+    llm = optional(llm_, llm)
+    eval_llm = optional(eval_llm_, eval_llm)
+    vision_eval_llm = optional(vision_eval_llm_, vision_eval_llm)
+
     env = Env()
     test.setup(env, Conversation(llm), llm, eval_llm, vision_eval_llm)
 
