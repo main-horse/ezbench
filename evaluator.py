@@ -542,6 +542,28 @@ class ExtractCode(Node):
         for maybe in self.try_extract(output):
             yield maybe, Reason(type(self), maybe)
 
+class CorrectlyExtractCode(Node):
+    def __init__(self): self.postfix = ""
+    def try_extract(self, output):
+        output = re.sub('```[a-z]*', '```', output)
+        if "```" in output:
+            ans = output.split("```")[1] + "\n" + self.postfix
+        else:
+            ans = output + "\n" + self.postfix
+        yield ans
+    def __call__(self, orig_output):
+        if orig_output.count("```") == 2:
+            for maybe in self.try_extract(orig_output):
+                yield maybe, Reason(type(self), maybe)
+            return
+        output = self.llm(
+            "An AI model outputed the following: \n\n<quote>" + orig_output + "</quote>\n\n"
+            "Please extract the raw final code produced by the model, without any additional text or formatting.\n"
+            "Ensure you do not modify the codeblock at all (even if it is wrong), and reply with zero prose or other text."
+        )
+        for maybe in self.try_extract(output):
+            yield maybe, Reason(type(self), maybe)
+
 class MakeFile(Node):
     """
     A node that makes a new file within the docker environment.

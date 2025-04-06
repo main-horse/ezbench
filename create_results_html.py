@@ -85,7 +85,7 @@ def format_markdown(reason, indent=0, *, term=False):
         return generate_section(pounds, "LLM Generation", f"#{pounds} Query\n{fix(reason.children[0].strip())}\n#{pounds} Output\n{fix(reason.children[1].strip())}", term)
     elif reason.node in (PythonRun, CRun, CppRun, RustRun, CargoRun, BashRun, TerminalRun, SQLRun):
         return generate_section(pounds, "Run Code Interpreter", f"Running the following program:\n> ```\n{fix(reason.children[0].strip())}\n> ```\nAnd got the output:\n```\n{reason.children[1]}\n```", term)
-    elif reason.node in (ExtractCode, ExtractLongestCode):
+    elif reason.node in (ExtractCode, ExtractLongestCode, CorrectlyExtractCode):
         return generate_section(pounds, "Extract Code", f"I extracted the following code from that output:\n> ```\n{fix(reason.children.strip())}\n> ```", term)
     elif reason.node == ExtractJSON:
         return generate_section(pounds, "Extract Json", f"I extracted the following JSON from that output:\n> ```json\n{fix(reason.children[0])}\n> ```", term)
