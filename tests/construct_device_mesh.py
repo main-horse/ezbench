@@ -1,7 +1,7 @@
 import typing
 import dill
 from evaluator import *
-from tests.harness import torch, extract_function, guarded
+from tests.harness import torch, extract_function, guarded, mp_worker
 
 DESCRIPTION = """Can use init_device_mesh or DeviceMesh constructor to create a DeviceMesh.
 
@@ -14,8 +14,8 @@ def create_mesh(dims: dict[str, int]):
 def create_mesh(dims: dict[str, int]):
     import math, torch
     return torch.distributed.device_mesh.DeviceMesh(
-         'cuda',
-         torch.arange(math.prod(dims.values())).reshape(*dims.values()),
+         device_type='cuda',
+         mesh=torch.arange(math.prod(dims.values())).reshape(*dims.values()),
          mesh_dim_names = tuple(dims.keys()),
     )
 [❌, misremembered kwarg (sonnet example)]
@@ -57,17 +57,8 @@ that the function will be executed under a `torchrun`'d process.
 Include all imports inline inside the function body.
 """
 
-def _worker(rank: int, world_size: int, f_bytes: bytes):
-    f = dill.loads(f_bytes)
-    import os
-    os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12345'
-    os.environ['LOCAL_RANK'] = os.environ['RANK'] = str(rank)
-    os.environ['WORLD_SIZE'] = str(world_size)
-    torch.cuda.set_device(rank)
-    
-    test_dims = dict(dp=1, fs=2, cp=2, tp=2)
-    mesh = f(test_dims)
+def mp_make_input() -> list: return [dict(dp=1, fs=2, cp=2, tp=2)]
+def mp_check_output(mesh):
     assert isinstance(mesh, torch.distributed.device_mesh.DeviceMesh)
     assert mesh.device_type == 'cuda'
     assert hasattr(mesh, 'mesh') and isinstance(mesh.mesh, torch.Tensor)
@@ -75,10 +66,15 @@ def _worker(rank: int, world_size: int, f_bytes: bytes):
     
     assert hasattr(mesh, 'mesh_dim_names') and isinstance(mesh.mesh_dim_names, tuple)
     assert mesh.mesh_dim_names == ('dp', 'fs', 'cp', 'tp')
+
 @guarded
-def method_satisfies(f: typing.Callable[[dict[str, int]], torch.distributed.device_mesh.DeviceMesh]) -> bool:
-    f_bytes = dill.dumps(f)
-    return torch.multiprocessing.spawn(_worker, args=(8, f_bytes), nprocs=8, join=True) is None
+def method_satisfies(f: typing.Callable[[dict[str, int]], torch.distributed.device_mesh.DeviceMesh], *, ws: int=8) -> bool:
+    return torch.multiprocessing.spawn(
+        mp_worker,
+        args=(ws, dill.dumps(f), mp_make_input, mp_check_output),
+        nprocs=ws,
+        join=True
+    ) is None
 
 
 TestThing = question >> LLMRun() >> CorrectlyExtractCode() >> PyFunc(
@@ -93,6 +89,7 @@ if __name__ == "__main__":
     # '''
     # exec(codeblock, globals(), namespace := {})
     # print(method_satisfies(namespace['create_mesh']))
+    # exit()
 
     # print(run_test(TestThing, llm_="gpt-4o"))
     # print(run_test(TestThing, llm_="claude-3-7-sonnet-latest"))

@@ -1,9 +1,23 @@
 # NOT ACTUALLY A TEST DO NOT RUN ME
+import dill
 import functools
 import time
 import torch
 
 from contextlib import contextmanager
+
+def mp_worker(r: int, ws: int, f_bytes: bytes, prologue: callable, epilogue: callable):
+    f = dill.loads(f_bytes)
+    import os
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12345'
+    os.environ['LOCAL_RANK'] = os.environ['RANK'] = str(r)
+    os.environ['WORLD_SIZE'] = str(ws)
+    torch.cuda.set_device(r)
+
+    inp = prologue()
+    res = f(*inp)
+    epilogue(res)
 
 def extract_function(code_str: str, fn_name: str) -> callable:
     namespace = {}
@@ -49,4 +63,10 @@ if __name__ == "__main__":
     assert ensure_nonblocking("lambda: 1")
     assert ensure_nonblocking("lambda: torch.zeros(1,device='cuda')")
     assert ensure_nonblocking("lambda: torch.randn(128,1024,1024,device='cuda')")
-    assert ensure_nonblocking("lambda: torch.empty(65536,device='cuda').bernoulli_(0.01)")
+    def f(b=99,s=4096):
+        with torch.device('cuda'): torch.randn(b,s)[torch.rand(b).le_(0.1).to(torch.bool)] = 0
+    assert ensure_nonblocking(f)
+
+    assert not ensure_nonblocking("torch.cuda.synchronize")
+    assert not ensure_nonblocking("lambda: torch.tensor(1,device='cuda')")
+    assert not ensure_nonblocking(lambda: (x:=torch.randn(128,device='cuda'), x[x!=0]))
