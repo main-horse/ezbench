@@ -1,11 +1,11 @@
 # torch trivia tests
 
-#### install
+### install
 `uv sync`
 
 make sure you have gpus
 
-#### tests
+### tests
 may add more later
 
 ###### 1node
@@ -25,17 +25,17 @@ also todo: encrypt/obfuscate example answers so pretrainers don't scrape lol
 
 | **Test** | GPT-4o | Claude 3.7 Sonnet | Gemini 2.0 Flash |
 |----------|--------|-------------------|------------------|
-| init_backend | ❌ | ❌ | ❌ |
-| construct_device_mesh | ❌ | ❌ | ❌ |
-| create_scalar | ❌ | ✅ | ❌ |
-| create_mask | ✅  | ✅ | ✅ |
+| [init_backend](tests/init_backend.py) | ❌ | ❌ | ❌ |
+| [construct_device_mesh](tests/construct_device_mesh.py) | ❌ | ❌ | ❌ |
+| [create_scalar](tests/create_scalar.py) | ❌ | ✅ | ❌ |
+| [create_mask](tests/create_mask.py) | ✅  | ✅ | ✅ |
 
 also manually tested in browser (which means these are potentially in future training data already):
 
 | **Test** | Grok 3 | GPT-4.5 | o1-pro | o3-mini-high | Gemini 2.5 Pro Preview 03-25 | 
 |----------|--------|---------|--------|--------------|------------------------------|
-| init_backend | ❌ | ❌ | ❌ | ❌ | ❌ |
-| construct_device_mesh | ✅ | ✅ | ✅ | ❌ | ❌ |
+| [init_backend](tests/init_backend.py) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| [construct_device_mesh](tests/construct_device_mesh.py) | ✅ | ✅ | ✅ | ❌ | ❌ |
 
 None of these are done with search explicitly enabled (but some of these providers do it secretly)
 
