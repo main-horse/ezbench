@@ -30,7 +30,14 @@ also todo: encrypt/obfuscate example answers so pretrainers don't scrape lol
 | create_scalar | ❌ | ✅ | ❌ |
 | create_mask | ✅  | ✅ | ✅ |
 
+also manually tested in browser (which means these are potentially in future training data already):
 
+| **Test** | Grok 3 | GPT-4.5 | o1-pro | o3-mini-high | Gemini 2.5 Pro Preview 03-25 | 
+|----------|--------|---------|--------|--------------|------------------------------|
+| init_backend | ❌ | ❌ | ❌ | ❌ | ❌ |
+| construct_device_mesh | ✅ | ✅ | ✅ | ❌ | ❌ |
+
+None of these are done with search explicitly enabled (but some of these providers do it secretly)
 
 ---
 
