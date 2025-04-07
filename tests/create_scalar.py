@@ -26,6 +26,5 @@ TestThing = question >> LLMRun() >> CorrectlyExtractCode() >> AndNode(
 )
 
 if __name__ == "__main__":
-    # print(run_test(TestThing, llm_="gpt-4o"))
-    # print(run_test(TestThing, llm_="claude-3-7-sonnet-latest"))
-    print(run_test(TestThing, llm_="gemini-2.0-flash"))
+    from tests.harness import run_models_test
+    run_models_test(TestThing)

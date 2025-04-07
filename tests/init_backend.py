@@ -52,3 +52,11 @@ def method_satisfies(f: typing.Callable[[], None], *, ws: int=2) -> bool:
 TestThing = question >> LLMRun() >> CorrectlyExtractCode() >> PyFunc(
     lambda s: method_satisfies(construct_function(s))
 )
+
+if __name__ == "__main__":
+    # assert method_satisfies(construct_function('torch.distributed.init_process_group("cpu:gloo,cuda:nccl")'))
+    # assert not method_satisfies(construct_function('torch.distributed.init_process_group()'))
+    from tests.harness import run_models_test
+    run_models_test(TestThing)
+
+

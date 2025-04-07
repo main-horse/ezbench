@@ -59,6 +59,18 @@ def ensure_nonblocking(code: "str | Callable[[], Any]") -> bool:
     inner,outer = inner(),outer()
     return inner*5 < outer
 
+def run_models_test(test, models=None):
+    models = models or ["gpt-4o", "claude-3-7-sonnet-latest", "gemini-2.0-flash"]
+    results = {}
+    for model in models:
+        print('='*100)
+        print(f'Testing with {model}')
+        print('='*100)
+        from evaluator import run_test
+        results[model] = run_test(test, llm_=model)
+    
+    return results
+
 if __name__ == "__main__":
     assert ensure_nonblocking("lambda: 1")
     assert ensure_nonblocking("lambda: torch.zeros(1,device='cuda')")

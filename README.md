@@ -10,6 +10,7 @@ may add more later
 
 ###### 1node
 ```bash
+PYTHONPATH='.' uv run tests/init_backend.py 
 PYTHONPATH='.' uv run tests/construct_device_mesh.py 
 ```
 ###### 1gpu
