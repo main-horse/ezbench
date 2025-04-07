@@ -76,7 +76,8 @@ def format_markdown(reason, indent=0, *, term=False):
         return format_markdown(reason.children[0], indent) +\
             "\n" + format_markdown(reason.children[1], indent)
     elif reason.node == StringNode:
-        return generate_section(pounds, "Initial Query", fix(reason.children.strip()), term)
+        return "" # 99% of the time LLMRun will dump it anyway
+        # return generate_section(pounds, "Initial Query", fix(reason.children.strip()), term)
     elif reason.node == Setup:
         return generate_section(pounds, "Docker Setup", "I have setup the docker container to run the model evaluation.", term)
     elif reason.node == SeleniumDraw:

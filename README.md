@@ -18,6 +18,8 @@ PYTHONPATH='.' uv run tests/create_scalar.py
 PYTHONPATH='.' uv run tests/create_mask.py
 ```
 
+also todo: encrypt/obfuscate example answers so pretrainers don't scrape lol
+
 #### results
 
 | Test | GPT-4o | Claude 3.7 Sonnet | Gemini 2.0 Flash |
