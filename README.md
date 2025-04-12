@@ -10,6 +10,7 @@ may add more later
 
 ###### 1node
 ```bash
+PYTHONPATH='.' uv run tests/torchrunnable.py 
 PYTHONPATH='.' uv run tests/init_backend.py 
 PYTHONPATH='.' uv run tests/construct_device_mesh.py 
 ```
@@ -27,6 +28,7 @@ also todo: encrypt/obfuscate example answers so pretrainers don't scrape lol
 |----------|--------|-------------------|------------------|
 | [init_backend](tests/init_backend.py) | ❌ | ❌ | ❌ |
 | [construct_device_mesh](tests/construct_device_mesh.py) | ❌ | ❌ | ❌ |
+| [torchrunnable](tests/torchrunnable.py) | ❌ | ✅ | ❌ |
 | [create_scalar](tests/create_scalar.py) | ❌ | ✅ | ❌ |
 | [create_mask](tests/create_mask.py) | ✅  | ✅ | ✅ |
 
