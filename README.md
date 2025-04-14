@@ -19,6 +19,10 @@ PYTHONPATH='.' uv run tests/construct_device_mesh.py
 PYTHONPATH='.' uv run tests/create_scalar.py
 PYTHONPATH='.' uv run tests/create_mask.py
 ```
+###### cpu
+```bash
+PYTHONPATH='.' uv run tests/linear.py
+```
 
 also todo: encrypt/obfuscate example answers so pretrainers don't scrape lol
 
@@ -28,6 +32,7 @@ also todo: encrypt/obfuscate example answers so pretrainers don't scrape lol
 |----------|--------|-------------------|------------------|
 | [init_backend](tests/init_backend.py) | ❌ | ❌ | ❌ |
 | [construct_device_mesh](tests/construct_device_mesh.py) | ❌ | ❌ | ❌ |
+| [linear](tests/linear.py) | ❌ | ✅ | ❌ |
 | [torchrunnable](tests/torchrunnable.py) | ❌ | ✅ | ❌ |
 | [create_scalar](tests/create_scalar.py) | ❌ | ✅ | ❌ |
 | [create_mask](tests/create_mask.py) | ✅  | ✅ | ✅ |
